@@ -17,7 +17,7 @@ class dstat_plugin(dstat):
         self.diskfilter = re.compile('^(dm-\d+|md\d+|[hsv]d[a-z]+\d+)$')
         self.open('/proc/diskstats')
         self.cols = 1
-        self.struct = dict( tot_ticks=0 )
+        self.struct = dict( tot_io_ms=0 )
 
     def discover(self, *objlist):
         ret = []
@@ -59,11 +59,11 @@ class dstat_plugin(dstat):
             name = l[2]
             if name not in self.vars: continue
             self.set2[name] = dict(
-                tot_ticks = long(l[12])
+                tot_io_ms = long(l[12])
             )
 
         for name in self.vars:
-            self.val[name] = ( (self.set2[name]['tot_ticks'] - self.set1[name]['tot_ticks']) * 1.0 * hz / elapsed / 1000, )
+            self.val[name] = ( (self.set2[name]['tot_io_ms'] - self.set1[name]['tot_io_ms']) * 1.0 * 100 / elapsed / 1000, )
 
         if step == op.delay:
             self.set1.update(self.set2)
